@@ -26,4 +26,21 @@ TOKEN_SPEC = [
     ("ESPACO",      r"[ \t]+"),
 ]
 def tokenizar(codigo):
-    pass
+    # Combina todos os padroes em um unico regex de grupos nomeados
+    tokens = []
+    padrao = "|".join(f"(?P<{nome}>{regex})" for nome, regex in TOKEN_SPEC)
+
+    for match in re.finditer(padrao, codigo):
+        tipo  = match.lastgroup
+        valor = match.group()
+
+        if tipo in ("ESPACO", "NOVA_LINHA"):
+            continue
+        if tipo == "NUMERO":
+            valor = float(valor) if "." in valor else int(valor)
+        if tipo == "STRING":
+            valor = valor[1:-1]   # remove aspas da string
+
+        tokens.append((tipo, valor))
+
+    return tokens
