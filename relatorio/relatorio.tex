@@ -92,7 +92,55 @@ implementa precedencia: $*$ e $/$ resolvem antes de $+$ e $-$;
 grupos entre delimitadores tem precedencia maxima.
 
 \section{Analise Lexica}
-% a completar
+
+A \textbf{analise lexica} converte codigo-fonte em tokens — unidades minimas
+de significado. Analogia: como nosso cerebro identifica palavras ao ler.
+
+\subsection{Tokens Reconhecidos}
+
+\begin{center}
+{\small
+\begin{tabular}{lll}
+\toprule
+\textbf{Token} & \textbf{Padrao (regex)} & \textbf{Exemplo} \\
+\midrule
+NUMERO   & \texttt{\textbackslash d+(\textbackslash.\textbackslash d+)?} & \texttt{42}, \texttt{3.14} \\
+STRING   & \texttt{"[\^{}"]*"}   & \texttt{"Ola"} \\
+IF/ELSE  & \texttt{\textbackslash bif\textbackslash b} & \texttt{if}, \texttt{else} \\
+WHILE    & \texttt{\textbackslash bwhile\textbackslash b} & \texttt{while} \\
+FUNC     & \texttt{\textbackslash bfunc\textbackslash b} & \texttt{func} \\
+IDENT    & \texttt{[a-z\_]\textbackslash w*} & \texttt{x}, \texttt{soma} \\
+OP       & \texttt{[+\textbackslash-*/]}     & \texttt{+}, \texttt{*} \\
+OP\_COMP & \texttt{==|!=|<=|>=|<|>}          & \texttt{>=} \\
+ATRIB    & \texttt{=}            & \texttt{=} \\
+\bottomrule
+\end{tabular}
+}
+\end{center}
+
+\subsection{Exemplo Comentado}
+
+Entrada: \verb|resultado = (10 + [5 * 2]) - {3}|
+
+\begin{lstlisting}[caption={Tokens gerados pelo lexer}]
+('IDENT',    'resultado')   <- variavel
+('ATRIB',    '=')           <- atribuicao
+('LPAREN',   '(')           <- abre grupo ()
+('NUMERO',   10)            <- inteiro
+('OP',       '+')           <- adicao
+('LBRACKET', '[')           <- abre grupo []
+('NUMERO',   5)
+('OP',       '*')           <- multiplicacao (precedencia maior)
+('NUMERO',   2)
+('RBRACKET', ']')
+('RPAREN',   ')')
+('OP',       '-')
+('LBRACE',   '{')           <- abre grupo {}
+('NUMERO',   3)
+('RBRACE',   '}')
+\end{lstlisting}
+
+Calculo: $10 + (5 \times 2) - 3 = \mathbf{17}$
 
 \section{Conclusao}
 % a completar
