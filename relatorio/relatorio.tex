@@ -11,6 +11,18 @@
 
 \geometry{top=3cm, bottom=2cm, left=3cm, right=2cm}
 
+\definecolor{codebg}{rgb}{0.95,0.95,0.95}
+\definecolor{kwcolor}{rgb}{0.0,0.3,0.7}
+
+\lstdefinestyle{nova}{
+  backgroundcolor=\color{codebg},
+  keywordstyle=\color{kwcolor}\bfseries,
+  basicstyle=\ttfamily\small,
+  breaklines=true, frame=single,
+  numbers=left, numberstyle=\tiny,
+  morekeywords={if,else,while,func,return,print,input}
+}
+
 \begin{document}
 
 \begin{titlepage}
@@ -55,7 +67,29 @@ A linguagem suporta:
 \end{itemize}
 
 \section{Gramatica da Linguagem}
-% a completar
+
+A gramatica e definida em \textbf{BNF} (\textit{Backus-Naur Form}).
+
+\begin{lstlisting}[style=nova, caption={Gramatica BNF de NovaLang}]
+<programa>    ::= <instrucao>*
+<instrucao>   ::= <atrib> | <if> | <while> | <func> | <print> | <return>
+<atrib>       ::= IDENT '=' <expressao>
+<expressao>   ::= <termo> (('+' | '-') <termo>)*
+                | <expressao> OP_COMP <expressao>
+<termo>       ::= <fator> (('*' | '/') <fator>)*
+<fator>       ::= NUMERO | IDENT | '(' expr ')' | '[' expr ']' | '{' expr '}'
+                | <chamada> | <input>
+<if>          ::= 'if' <expr> '{' <instrucao>* '}' ('else' '{' ... '}')?
+<while>       ::= 'while' <expr> '{' <instrucao>* '}'
+<func>        ::= 'func' IDENT '(' params? ')' '{' <instrucao>* '}'
+<print>       ::= 'print' '(' <expr> ')'
+<input>       ::= 'input' '(' STRING ')'
+<return>      ::= 'return' <expr>
+\end{lstlisting}
+
+A hierarquia \texttt{expressao} $\to$ \texttt{termo} $\to$ \texttt{fator}
+implementa precedencia: $*$ e $/$ resolvem antes de $+$ e $-$;
+grupos entre delimitadores tem precedencia maxima.
 
 \section{Analise Lexica}
 % a completar
