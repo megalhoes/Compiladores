@@ -53,22 +53,29 @@
 \section{Introducao}
 
 Este trabalho descreve o desenvolvimento de \textbf{NovaLang}, uma linguagem
-de programacao educacional implementada em Python. O objetivo e demonstrar
-na pratica os principios da construcao de compiladores, cobrindo as tres
-fases classicas: analise lexica, analise sintatica e interpretacao.
+de programacao educacional implementada em Python. O objetivo e demonstrar,
+de forma pratica e didatica, os principios fundamentais da construcao de
+compiladores, percorrendo as tres fases classicas: analise lexica, analise
+sintatica e interpretacao \cite{aho2007}.
 
-A linguagem suporta:
+A linguagem foi projetada para suportar:
 \begin{itemize}
-  \item Operacoes matematicas com precedencia correta;
-  \item Agrupamento com \texttt{()}, \texttt{[]} e \texttt{\{\}};
-  \item Funcoes com parametros e retorno;
-  \item Condicional \texttt{if}/\texttt{else} e laco \texttt{while};
-  \item \texttt{print} e \texttt{input}.
+  \item Operacoes matematicas ($+$, $-$, $\times$, $\div$) com precedencia
+        correta e agrupamento por \texttt{()}, \texttt{[]} e \texttt{\{\}};
+  \item Declaracao e chamada de funcoes com parametros e valor de retorno;
+  \item Estrutura condicional \texttt{if}/\texttt{else};
+  \item Laco de repeticao \texttt{while};
+  \item Exibicao na tela via \texttt{print};
+  \item Captura de entrada do usuario via \texttt{input}.
 \end{itemize}
+
+O desenvolvimento contou com auxilio de inteligencia artificial como ferramenta
+de apoio, detalhada na Secao~\ref{sec:conclusao}.
 
 \section{Gramatica da Linguagem}
 
-A gramatica e definida em \textbf{BNF} (\textit{Backus-Naur Form}).
+A gramatica é definida em notacao \textbf{BNF}
+(\textit{Backus-Naur Form}) \cite{louden1997}.
 
 \begin{lstlisting}[style=nova, caption={Gramatica BNF de NovaLang}]
 <programa>    ::= <instrucao>*
@@ -77,8 +84,11 @@ A gramatica e definida em \textbf{BNF} (\textit{Backus-Naur Form}).
 <expressao>   ::= <termo> (('+' | '-') <termo>)*
                 | <expressao> OP_COMP <expressao>
 <termo>       ::= <fator> (('*' | '/') <fator>)*
-<fator>       ::= NUMERO | IDENT | '(' expr ')' | '[' expr ']' | '{' expr '}'
-                | <chamada> | <input>
+<fator>       ::= NUMERO | IDENT
+                | '(' <expressao> ')'
+                | '[' <expressao> ']'
+                | '{' <expressao> '}'
+                | <chamada_funcao> | <input>
 <if>          ::= 'if' <expr> '{' <instrucao>* '}' ('else' '{' ... '}')?
 <while>       ::= 'while' <expr> '{' <instrucao>* '}'
 <func>        ::= 'func' IDENT '(' params? ')' '{' <instrucao>* '}'
@@ -87,14 +97,15 @@ A gramatica e definida em \textbf{BNF} (\textit{Backus-Naur Form}).
 <return>      ::= 'return' <expr>
 \end{lstlisting}
 
-A hierarquia \texttt{expressao} $\to$ \texttt{termo} $\to$ \texttt{fator}
-implementa precedencia: $*$ e $/$ resolvem antes de $+$ e $-$;
-grupos entre delimitadores tem precedencia maxima.
+A hierarquia \texttt{expressao} $\rightarrow$ \texttt{termo} $\rightarrow$
+\texttt{fator} implementa a precedencia matematica: $\times$ e $\div$
+resolvem antes de $+$ e $-$; grupos entre delimitadores tem precedencia maxima.
 
 \section{Analise Lexica}
 
-A \textbf{analise lexica} converte codigo-fonte em tokens — unidades minimas
-de significado. Analogia: como nosso cerebro identifica palavras ao ler.
+A \textbf{analise lexica} e a primeira fase do compilador. Ela percorre o
+codigo-fonte e agrupa caracteres em unidades chamadas \textbf{tokens}
+— as menores unidades com significado.
 
 \subsection{Tokens Reconhecidos}
 
@@ -107,14 +118,15 @@ A tabela abaixo lista todas as categorias de tokens reconhecidas pelo analisador
 \textbf{Token} & \textbf{Padrao (regex)} & \textbf{Exemplo} \\
 \midrule
 NUMERO   & \texttt{\textbackslash d+(\textbackslash.\textbackslash d+)?} & \texttt{42}, \texttt{3.14} \\
-STRING   & \texttt{"[\^{}"]*"}   & \texttt{"Ola"} \\
-IF/ELSE  & \texttt{\textbackslash bif\textbackslash b} & \texttt{if}, \texttt{else} \\
+STRING   & \texttt{"[\^{}"]*"}         & \texttt{"Ola"} \\
+IF       & \texttt{\textbackslash bif\textbackslash b}    & \texttt{if} \\
+ELSE     & \texttt{\textbackslash belse\textbackslash b}  & \texttt{else} \\
 WHILE    & \texttt{\textbackslash bwhile\textbackslash b} & \texttt{while} \\
-FUNC     & \texttt{\textbackslash bfunc\textbackslash b} & \texttt{func} \\
-IDENT    & \texttt{[a-z\_]\textbackslash w*} & \texttt{x}, \texttt{soma} \\
-OP       & \texttt{[+\textbackslash-*/]}     & \texttt{+}, \texttt{*} \\
-OP\_COMP & \texttt{==|!=|<=|>=|<|>}          & \texttt{>=} \\
-ATRIB    & \texttt{=}            & \texttt{=} \\
+FUNC     & \texttt{\textbackslash bfunc\textbackslash b}  & \texttt{func} \\
+IDENT    & \texttt{[a-zA-Z\_]\textbackslash w*} & \texttt{x}, \texttt{soma} \\
+OP       & \texttt{[+\textbackslash-*/]}        & \texttt{+}, \texttt{*} \\
+OP\_COMP & \texttt{==|!=|<=|>=|<|>}    & \texttt{>=} \\
+ATRIB    & \texttt{=}                  & \texttt{=} \\
 \bottomrule
 \end{tabular}
 }
@@ -125,19 +137,19 @@ ATRIB    & \texttt{=}            & \texttt{=} \\
 Entrada: \verb|resultado = (10 + [5 * 2]) - {3}|
 
 \begin{lstlisting}[caption={Tokens gerados pelo lexer}]
-('IDENT',    'resultado')   <- variavel
-('ATRIB',    '=')           <- atribuicao
-('LPAREN',   '(')           <- abre grupo ()
-('NUMERO',   10)            <- inteiro
+('IDENT',    'resultado')   <- nome de variavel
+('ATRIB',    '=')           <- atribuicao (nao e comparacao)
+('LPAREN',   '(')           <- abre grupo com parenteses
+('NUMERO',   10)            <- literal int (texto -> int)
 ('OP',       '+')           <- adicao
-('LBRACKET', '[')           <- abre grupo []
+('LBRACKET', '[')           <- abre grupo com colchetes
 ('NUMERO',   5)
 ('OP',       '*')           <- multiplicacao (precedencia maior)
 ('NUMERO',   2)
 ('RBRACKET', ']')
 ('RPAREN',   ')')
-('OP',       '-')
-('LBRACE',   '{')           <- abre grupo {}
+('OP',       '-')           <- subtracao
+('LBRACE',   '{')           <- abre grupo com chaves
 ('NUMERO',   3)
 ('RBRACE',   '}')
 \end{lstlisting}
@@ -145,6 +157,51 @@ Entrada: \verb|resultado = (10 + [5 * 2]) - {3}|
 Calculo: $10 + (5 \times 2) - 3 = \mathbf{17}$
 
 \section{Conclusao}
-% a completar
+\label{sec:conclusao}
+
+O projeto demonstrou como as tres fases de um compilador colaboram de
+forma modular. A separacao em \texttt{lexer.py}, \texttt{parser.py} e
+\texttt{interpreter.py} tornou o codigo extensivel e facilitou a depuracao
+isolada de cada etapa.
+
+\subsection{Uso de Inteligencia Artificial}
+
+O modelo Claude (Anthropic) foi utilizado como ferramenta de apoio em
+quatro situacoes:
+
+\begin{enumerate}
+  \item \textbf{Estrutura do lexer:} Sugestao do uso de \texttt{re.finditer}
+        com grupos nomeados. Avaliado, compreendido e adotado.
+
+  \item \textbf{Precedencia matematica:} \texttt{2 + 3 * 4} retornava 20.
+        A IA sugeriu a hierarquia
+        \texttt{parsear\_expressao} $\rightarrow$ \texttt{parsear\_termo}.
+        Implementado e validado.
+
+  \item \textbf{Escopo de funcoes:} Variaveis locais vazavam para o escopo
+        global. Corrigido com copia e restauracao do dicionario de ambiente.
+
+  \item \textbf{Divisao por zero:} Sem mensagem amigavel. Corrigido com
+        verificacao explicita antes da operacao.
+\end{enumerate}
+
+\subsection{Aprendizados}
+
+Compiladores sao sistemas modulares com responsabilidades claras por camada.
+A IA acelerou o desenvolvimento, mas cada sugestao foi compreendida e
+validada antes de ser adotada. Como extensao futura: vetores, tipos
+explicitos e mensagens de erro com numero de linha.
+
+\begin{thebibliography}{9}
+\bibitem{aho2007}
+  AHO, Alfred V. et al.
+  \textit{Compiladores: Principios, Tecnicas e Ferramentas}.
+  2. ed. Sao Paulo: Pearson, 2007.
+
+\bibitem{louden1997}
+  LOUDEN, Kenneth C.
+  \textit{Compiler Construction: Principles and Practice}.
+  Boston: PWS Publishing, 1997.
+\end{thebibliography}
 
 \end{document}
