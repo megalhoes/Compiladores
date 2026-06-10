@@ -1,0 +1,19 @@
+func calcular(base, altura) {
+    return base * altura / 2
+}
+
+base   = input("Digite a base: ")
+altura = input("Digite a altura: ")
+
+area = calcular(base, altura)
+print(area)
+
+i = 1
+while i <= 5 {
+    if i == 3 {
+        print("chegou no 3!")
+    } else {
+        print(i)
+    }
+    i = i + 1
+}
