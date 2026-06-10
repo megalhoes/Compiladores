@@ -4,11 +4,10 @@ class RetornoFuncao(Exception):
 
 class Interpretador:
     def __init__(self):
-        self.ambiente = {}
-        self.funcoes  = {}
+        self.ambiente = {}    # variaveis: nome -> valor
+        self.funcoes  = {}    # funcoes: nome -> (params, corpo)
 
     def executar(self, no):
-        # Processa instrucoes (efeitos colaterais, sem retornar valor)
         tipo = no[0]
         if tipo == "PROGRAMA":
             for instrucao in no[1]: self.executar(instrucao)
@@ -31,7 +30,7 @@ class Interpretador:
         elif tipo == "RETURN":
             raise RetornoFuncao(self.avaliar(no[1]))
         elif tipo == "CHAMADA":
-            self.avaliar(no)  # executa descartando o retorno
+            self.avaliar(no)
         else:
             raise RuntimeError(f"No desconhecido: {tipo}")
 
