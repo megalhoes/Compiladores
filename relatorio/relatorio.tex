@@ -6,17 +6,22 @@
 \usepackage{geometry}
 \usepackage{listings}
 \usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{amsmath}
 \usepackage{indentfirst}
 \usepackage{booktabs}
+
 
 \geometry{top=3cm, bottom=2cm, left=3cm, right=2cm}
 
 \definecolor{codebg}{rgb}{0.95,0.95,0.95}
 \definecolor{kwcolor}{rgb}{0.0,0.3,0.7}
+\definecolor{cmcolor}{rgb}{0.3,0.5,0.3}
 
 \lstdefinestyle{nova}{
   backgroundcolor=\color{codebg},
   keywordstyle=\color{kwcolor}\bfseries,
+  commentstyle=\color{cmcolor}\itshape,
   basicstyle=\ttfamily\small,
   breaklines=true, frame=single,
   numbers=left, numberstyle=\tiny,
@@ -173,9 +178,9 @@ quatro situacoes:
   \item \textbf{Estrutura do lexer:} Sugestao do uso de \texttt{re.finditer}
         com grupos nomeados. Avaliado, compreendido e adotado.
 
-  \item \textbf{Precedencia matematica:} \texttt{2 + 3 * 4} retornava 20.
-        A IA sugeriu a hierarquia
-        \texttt{parsear\_expressao} $\rightarrow$ \texttt{parsear\_termo}.
+\item \textbf{Precedencia matematica:} \texttt{2 + 3 * 4} retornava 20.
+        A IA sugeriu a hierarquia \textit{parsear\_expressao}
+        $\rightarrow$ \textit{parsear\_termo}.
         Implementado e validado.
 
   \item \textbf{Escopo de funcoes:} Variaveis locais vazavam para o escopo
