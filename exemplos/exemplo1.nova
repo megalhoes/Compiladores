@@ -1,3 +1,8 @@
-x = 10
-y = (2 + 3) * 4
-print(y)
+x = 15
+y = 10
+
+if x > y {
+    print("x e maior")
+} else {
+    print("y e maior ou igual")
+}
