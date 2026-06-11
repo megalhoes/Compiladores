@@ -20,8 +20,8 @@ python main.py                          # REPL interativo
 - print() e input()
 
 ## Integrantes
-- Nome Lucas Cortez
-- Nome Marcos Magalhães
+- Lucas Cortez
+- Marcos Magalhães
 
 ## Status
 Concluido
